@@ -1,0 +1,8 @@
+*.blg
+*.aux
+*.blg
+*.bbl
+*.log
+*.out
+*.pdf
+!col_spars_nlogn_100.pdf

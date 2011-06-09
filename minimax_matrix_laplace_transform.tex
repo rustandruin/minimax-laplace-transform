@@ -105,32 +105,26 @@ Thus, $n = \mathrm{K} \varepsilon^{-2} p \log p$ samples suffice to ensure that 
 
 \subsection{Related Work}
 
-Theorem \ref{thm:examplecovarest} provides information about the entire spectrum of a random matrix, including the limiting behavior of the eigenvalues and a bound on the rate at which they converge. We believe that this paper contains the first general-purpose tools for studying the full spectrum of a finite-dimensional random matrix. The literature on random matrix theory (RMT) contains some complementary results, but they do not seem to apply with the same generality.
+Theorem \ref{thm:examplecovarest} provides information about the entire spectrum of a random matrix, including the limiting behavior of the eigenvalues and a bound on the rate at which they converge. We believe that this paper contains the first general-purpose tools for studying the full spectrum of a finite-dimensional random matrix. The literature on random matrix theory (RMT) contains some complementary results, but they do not seem to apply with the same generality. Methods from RMT fall into two rough categories: asymptotic methods and nonasymptotic methods. We discuss the relevant results from each in turn.
 
-Methods from RMT fall into two rough categories: asymptotic methods and nonasymptotic methods. We discuss each in turn.
+The modern asymptotic theory began in the 1950s with the observation by physicists that, on certain scales, the behavior of quantum systems is described by the spectra of random matrices. They further observed the phenomenon of \emph{universality}: as the dimension increases, the statistics of their spectra become largely independent of the particular choice of distribution the random matrices are drawn from. Since this time, physicists, statisticians, engineers, and mathematicians have found manifold applications of the asymptotic theory in large-dimensional statistics, physics, wireless communication, and pure mathematics, to mention only a few areas. 
 
-The asymptotic approach focuses on specific families of random matrices, called ensembles. For example, the Wigner ensemble consists of self-adjoint matrices whose superdiagonal entries are independent random variables with variance one. The primary goal in asymptotic RMT is to study the properties of the limiting spectral distribution (LSD) of matrices drawn from a particular ensemble as the matrix size tends to infinity. For instance, the LSD for the Wigner ensemble is the semicircular density~\cite{Wigner}. The literature contains many other types of results, including information about the rate of convergence of the empirical spectrum to the LSD~\cite{CB04}, situations when the extreme eigenvalues converge~\cite{BY88}, and the distribution of the largest eigenvalue~\cite{Tracy--Widom}. See~\cite{Bai99, BS10} for an overview of results.
+Asymptotic random matrix theory has developed primarily through the study of sample covariance matrices and \emph{ensembles}, certain classes of random matrices. The most studied ensembles are the various Wigner ensembles, consisting of Hermitian matrices whose entries are i.i.d. up to the constraints imposed by the symmetry condition. To state the fundamental result on Wigner ensembles, we introduce the empirical spectral distribution function (ESD) of a Hermitian matrix $\mat{A}$,
+\[
+F^{\mat{A}}(x) = \frac{1}{n} \#\{ 1 \leq i \leq n : \lambda_i(\mat{A}) \leq x \}.
+\]
+We see that $F^{\mat{A}}$ is a random measure that encodes the statistics of the spectrum of $\mat{A}.$ Wigner's theorem, the seminal result in the asymptotic theory, establishes that the ESD of the Wigner ensemble consisting of matrices whose entries are i.i.d $\mathcal{N}(0, 1/n)$ random variables converges, as $n$ approaches infinity, to the semicircular law, given by 
+\[
+F(x) = \begin{cases}
+\frac{1}{2\pi}\sqrt{4 - x^2}, & \text{if } |x| \leq 2, \\
+0 & \text{otherwise.}
+\end{cases}
+\] 
+Thus, at least in the limiting sense, the spectrum of an element drawn from this ensemble is well characterized. The development of the classical asymptotic theory has been driven by the natural question raised by Wigner's result: to what extent is the semicircular law, or more generally, the existence of a limiting spectral distribution universal?
 
-Asymptotic RMT provides incredibly sharp information about the behavior of large matrices drawn from certain ensembles. Nevertheless, these techniques have some limitations. The LSD does not provide information about any specific eigenvalue, so additional arguments are required to study individual eigenvalues. It can also be challenging to adapt asymptotic methods to study new ensembles of random matrices.
-
-Some of the major asymptotic techniques include the method of moments initiated by Wigner \cite{Wigner}, the Stieltjes transform approach of Mar\u{c}enko and Pastur ~\cite{MarcenkoPastur}, the theory of free probability of Voiculescu~\cite{Voi91}, and the Riemann--Hilbert approach~\cite{Dei99}. There are also some special methods for highly symmetric random matrices; see for example~\cite{Mui08,Ede88}.
-
-In contrast, the nonasymptotic approach focuses on the spectrum of a finite-dimensional random matrix without any recourse to a limit. For the most part, research focuses on the extreme eigenvalues, rather than the interior of the spectrum. The nonasymptotic literature emphasizes bounds that have the correct scaling behavior. For instance, the largest eigenvalue of an $n \times n$ Wigner matrix is known to have order $\sqrt{n}$ with high probability.
-
-Nonasymptotic RMT has several advantages over asymptotic methods. The results hold for specific random matrices of fixed dimension, which is important for some engineering applications. The methods can also yield detailed information about rates of convergence. In addition, the ideas can usually be adapted to new types of random matrices. On the other hand, nonasymptotic results are typically much less precise than asymptotic results because the optimality of constants is frequently disregarded. Furthermore, the nonasymptotic literature contains little information about the bulk of the spectrum. One notable exception is a result of Szarek for Gaussian matrices~\cite{Sza90}.
-
-The methods of nonasymptotic RMT were developed primarily by the geometric functional analysis community. Some common approaches include the use of comparison theorems~\cite{DavidsonSzarek01}, methods from empirical process theory~\cite{MP06}, concentration of measure phenomena~\cite{GZ00,AKV02}, and the application of noncommutative Khintchine inequalities~\cite{RU99}. See Vershynin's notes~\cite{Ver10} for an introduction to this area.
-
-We also mention that some researchers have started to combine ideas from asymptotic and nonasymptotic RMT. See, for example, the work of Tao and Vu on the universality of the circular law~\cite{TVK10}.
+Ony recently has the tide of research turned towards questions more germane to our specific concerns. the speed of the convergence of ESDs and the deviations of eigenvalues from the positions implied by the limiting spectral distributions.
 
 The current paper is ultimately based on the influential work of Ahlswede and Winter~\cite{AW02}. This line of  research leads to explicit tail bounds for the maximum eigenvalue of a sum of random matrices. These probability inequalities parallel the classical scalar tail bounds due to Bernstein and others. Matrix probability inequalities are interesting because they allow us to obtain valuable information about the maximum eigenvalue of a random matrix with very little effort. Furthermore, they apply to a wide variety of random matrices. On the other hand, this approach does not always yield sharp results because parasitic logarithmic factors arise in many settings.
-
-Major contributions to the literature on matrix probability inequalities include the papers~\cite{CM08, Recht09, Gross11}. We highlight two works of Oliveira~\cite{Oliv09,Oliv10} that go well beyond earlier research. The sharpest current results appear in the works of Tropp~\cite{T10a,Tropp11:Freedman}.
-
-%Theorem \ref{thm:examplecovarest} states that the eigenvalues of certain random matrices converge, so it is reasonable to expect that one may be able to find such a result using the techniques already developed for handling random matrices. Note, however, the theorem specifies a quantitative rate of convergence, and establishes control over the deviations of the eigenvalues of the empirical covariance matrices both above and below their limits. We now briefly survey the currently available tools, keeping in mind these requirements.
-
-
-%To illustrate the effectiveness of our approach, we investigate the convergence in relative error of the eigenvalues of the empirical covariance matrix of a Gaussian vector, and the effect of column sampling on the spectrum of a wide matrix with orthonormal rows.
 
 %Random matrices are employed in an increasing number of applications; to mention just a few: machine learning \cite{D04}, robust convex optimization \cite{So09,Nem07}, approximation algorithms for NP hard optimization problems \cite{Tamas06,So09b,FPR10}, and fast computational linear algebra \cite{HMT09,B09}. In each of these areas, the feasibility and efficacy of randomized algorithms is determined by the spectra of the random matrices used. 
 
