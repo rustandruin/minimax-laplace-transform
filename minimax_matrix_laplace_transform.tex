@@ -575,7 +575,7 @@ and define
 \] 
 Then, for any $t \geq 0,$
 \begin{align}
-\Prob{\lambda_k \left( \sum\nolimits_j \E \mat{X}_j \right) \geq \mu_k + t } & \leq (n-k+1) \cdot \exp\left\{ - \frac{t^2/2}{\sigma_k^2 + B t}\right\} \tag{i} \label{eqn:subexponentialbernstein} \\
+\Prob{\lambda_k \left( \sum\nolimits_j \mat{X}_j \right) \geq \mu_k + t } & \leq (n-k+1) \cdot \exp\left\{ - \frac{t^2/2}{\sigma_k^2 + B t}\right\} \tag{i} \label{eqn:subexponentialbernstein} \\
  & \leq \begin{cases}[1.5]
          (n-k+1) \cdot \exp\left\{ -\tfrac{1}{4} t^2/\sigma_k^2\right\} & \text{ for } t \leq \sigma_k^2/B \\
 	 (n-k+1) \cdot \exp\left\{ -\tfrac{1}{4} t/B\right\} & \text{ for } t \geq \sigma_k^2/B.

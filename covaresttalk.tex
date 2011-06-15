@@ -1,0 +1,141 @@
+\documentclass[pdf,mpa]{prosper}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,pstricks,pst-node}
+
+\title{Covariance estimation}
+\subtitle{an application of tail bounds for sums of random matrices}
+\author{Alex Gittens and Joel A. Tropp}
+\email{gittens@caltech.edu jtropp@cms.caltech.edu
+}
+\institution{\includegraphics[height=1.5cm]{caltech_logo}}
+\slideCaption{SPARS11}
+
+\newcommand{\mat}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\Prob}[1]{\ensuremath{\mathbb{P}\left\{#1 \right\}}}
+
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\C}{\ensuremath{\mathbb{C}}}
+\renewcommand{\R}{\ensuremath{\mathbb{R}}}
+
+\newtheorem{thm}{Theorem}
+
+\begin{document}
+\maketitle
+
+\begin{slide}{Problem Statement}
+
+Let $\mat{x}$ be a centered high-dimensional random vector. First order information on the dependence structure of $\mat{x}$ is captured by the covariance matrix
+\[
+\mat{\Sigma} = \E \mat{x} \mat{x}^t = (\E x_i x_j)_{i,j=1}^p = (\text{cov}(x_i, x_j))_{i=1}^p.
+\]
+The sample covariance matrix is a classical estimator for $\mat{\Sigma}:$
+\[
+\widehat{\mat{\Sigma}}_n = \frac{1}{n} \sum_{i=1}^n \mat{x}_i\mat{x}_i^t.
+\]
+
+How many samples of $\mat{x}$ are required so that $\widehat{\mat{\Sigma}}_n$ accurately estimates $\mat{\Sigma}?$
+
+\end{slide}
+
+\begin{slide}{Measures of Accuracy}
+What error measure is appropriate?
+
+\begin{itemize}
+\item Classical: how many samples ensure \[ \|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2? \]
+\item Estimation of high-dimensional structured r.v.s (desire $n \ll p$): how many samples ensure \[ \|\mat{M}\circ \mat{\Sigma} - \mat{M} \circ \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2? \]
+\end{itemize}
+
+\end{slide}
+
+\begin{slide}{What is known}
+\begin{itemize}
+	\item Classical: for log-concave distributions $\Omega(p)$ samples suffice (Adamczak et al. 2011), for distributions with finite fourth moments, $\tilde{\Omega}(p)$ samples suffice (Vershynin 2011), for distributions with finite second moments $\Omega(p\log p)$ samples suffice (Rudelson 1999). 
+	\item Structured:
+\end{itemize}
+\end{slide}
+
+\begin{slide}{An observation \dots}
+\[
+\|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2
+\]
+ensures (Davis--Kahan $\sin \Theta$ theorem) and is necessary for the recovery of eigenvectors of $\mat{\Sigma}$ \dots
+
+but \emph{not} the recovery of any but the top eigenvalue:
+\[
+|\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| < \varepsilon \|\mat{\Sigma}\|_2 
+\]
+is unsatisfactory if $\lambda_k \ll \lambda_1.$
+
+INSERT + + +             + illustration here
+
+\end{slide}
+
+\begin{slide}{\dots and a proposal}
+Consider the complimentary question:
+how many samples ensure the eigenvalues are estimated to relative accuracy,
+\[
+|\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| \leq \varepsilon \lambda_k(\mat{\Sigma}_n)?
+\]
+
+Would be useful to know for e.g. rank estimation with a user specified threshold.
+\end{slide}
+
+\begin{slide}{A simplified result}
+
+\begin{thm}
+Let $\{\mat{\eta}_j\}_{j=1}^n \subset \R^p$ be i.i.d. samples drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distribution. 
+If $n = \Omega(\varepsilon^{-2} p \log p),$ then with high probability
+\[
+|\lambda_k(\widehat{\mat{\Sigma}}_n) - \lambda_k(\mat{\Sigma})| \leq \varepsilon \lambda_k(\mat{\Sigma}) \quad \text{ for } k=1,\ldots,p.
+\]
+\end{thm}
+
+\begin{itemize}
+	\item The implicit constant depends on the spectrum of $\mat{\Sigma}.$
+	\item If $\mat{\Sigma}$ is rank $r,$ then $n= \Omega(\varepsilon^{-2} r \log r)$ samples suffice.
+	\item The approach generalizes to other distributions.
+\end{itemize}
+\end{slide}
+
+\begin{slide}{Proof sketch}
+(progressive display)
+\begin{enumerate}
+	\item Consider the probability that $|\hat{\lambda}_k - \lambda_k| > t.$
+
+	\item Address the cases $\hat{\lambda}_k < \lambda_k -t $ and $\hat{\lambda}_k > \lambda_k + t$ separately. 
+
+	\item {\bf Reduce the probability of each case occuring to the probability that the norm of an appropriate random matrix is large.}
+
+	\item {\bf Use matrix Bernstein bounds to control these probabilities. }
+
+	\item Take a union bound over the indices $k.$
+ \end{enumerate}
+ 
+\end{slide}
+
+\begin{slide}{}
+
+Let
+\[
+\mathbb{V}^p_d = \{ \mat{V} \in \C^{p \times d} : \mat{V}^\star \mat{V} = \mat{I} \}
+\]
+be the collection of $d$-dimensional orthogonal bases in $\C^p$. 
+
+Let $\mat{B} \in \mathbb{V}^p_{p-k+1}$ span the bottom $p-k+1$-dimensional invariant subspace of $\mat{\Sigma}.$
+
+By Courant--Fischer,
+\[
+\lambda_k(\widehat{\mat{\Sigma}}_n) = \min_{\mat{V} \in \mathbb{V}^p_{p-k+1}} \lambda_1(\mat{V}^\star \widehat{\mat{\Sigma}}_n\mat{V}) \leq \lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}).
+\]
+
+Thus 
+\[
+\Prob{\hat{\lambda}_k \geq \lambda_k + t } \leq \Prob{\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq \lambda_k(\mat{A}) + t }.
+\]
+
+\end{slide}
+
+
+\begin{slide}{A natural extension}
+\end{slide}
+\end{document}
+
