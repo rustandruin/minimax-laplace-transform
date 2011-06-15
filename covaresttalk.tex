@@ -1,6 +1,25 @@
 \documentclass[pdf,mpa]{prosper}
-\usepackage{amsmath,amssymb,amsfonts,amsthm,pstricks,pst-node}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+%\usepackage{tikz}
+%\usetikzlibrary{shapes,snakes}
 
+% Fancyboxes
+%\tikzstyle{questionbox} = [draw=red, fill=blue!20, very thick, rectangle, rounded corners, inner sep=5pt, inner ysep=5pt]
+%\tikzstyle{theorembox} = [draw=red, fill=blue!20, very thick, rectangle, rounded corners, inner sep=5pt, inner ysep=10pt]
+%\tikzstyle{fancytitle} =[fill=red, rounded corners, text=white]
+
+% My notations
+\newcommand{\mat}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\Prob}[1]{\ensuremath{\mathbb{P}\left\{#1 \right\}}}
+\renewcommand{\star}{*}
+
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\C}{\ensuremath{\mathbb{C}}}
+\renewcommand{\R}{\ensuremath{\mathbb{R}}}
+
+\newtheorem*{thm}{Theorem}
+
+% Titlepage info
 \title{Covariance estimation}
 \subtitle{an application of tail bounds for sums of random matrices}
 \author{Alex Gittens and Joel A. Tropp}
@@ -9,14 +28,6 @@
 \institution{\includegraphics[height=1.5cm]{caltech_logo}}
 \slideCaption{SPARS11}
 
-\newcommand{\mat}[1]{\ensuremath{\mathbf{#1}}}
-\newcommand{\Prob}[1]{\ensuremath{\mathbb{P}\left\{#1 \right\}}}
-
-\newcommand{\E}{\ensuremath{\mathbb{E}}}
-\newcommand{\C}{\ensuremath{\mathbb{C}}}
-\renewcommand{\R}{\ensuremath{\mathbb{R}}}
-
-\newtheorem{thm}{Theorem}
 
 \begin{document}
 \maketitle
@@ -25,70 +36,73 @@
 
 Let $\mat{x}$ be a centered high-dimensional random vector. First order information on the dependence structure of $\mat{x}$ is captured by the covariance matrix
 \[
-\mat{\Sigma} = \E \mat{x} \mat{x}^t = (\E x_i x_j)_{i,j=1}^p = (\text{cov}(x_i, x_j))_{i=1}^p.
+\mat{\Sigma} = \E \mat{x} \mat{x}^\star = (\E x_i x_j)_{i,j=1}^p = (\text{cov}(x_i, x_j))_{i=1}^p.
 \]
 The sample covariance matrix is a classical estimator for $\mat{\Sigma}:$
 \[
-\widehat{\mat{\Sigma}}_n = \frac{1}{n} \sum_{i=1}^n \mat{x}_i\mat{x}_i^t.
+\widehat{\mat{\Sigma}}_n = \frac{1}{n} \sum_{i=1}^n \mat{x}_i\mat{x}_i^\star.
 \]
 
-How many samples of $\mat{x}$ are required so that $\widehat{\mat{\Sigma}}_n$ accurately estimates $\mat{\Sigma}?$
-
-\end{slide}
-
-\begin{slide}{Measures of Accuracy}
-What error measure is appropriate?
-
-\begin{itemize}
-\item Classical: how many samples ensure \[ \|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2? \]
-\item Estimation of high-dimensional structured r.v.s (desire $n \ll p$): how many samples ensure \[ \|\mat{M}\circ \mat{\Sigma} - \mat{M} \circ \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2? \]
-\end{itemize}
-
+%\begin{tikzpicture}
+%\node [questionbox] (box){%
+\parbox{\textwidth}{How many samples of $\mat{x}$ are required so that $\widehat{\mat{\Sigma}}_n$ accurately estimates $\mat{\Sigma}?$}
+%};
+%\end{tikzpicture}
 \end{slide}
 
 \begin{slide}{What is known}
+
+Classical: how many samples ensure \[ \|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2? \]
 \begin{itemize}
-	\item Classical: for log-concave distributions $\Omega(p)$ samples suffice (Adamczak et al. 2011), for distributions with finite fourth moments, $\tilde{\Omega}(p)$ samples suffice (Vershynin 2011), for distributions with finite second moments $\Omega(p\log p)$ samples suffice (Rudelson 1999). 
-	\item Structured:
+    \item for log-concave distributions $\Omega(p)$ samples suffice (Adamczak et al. 2011), 
+    \item for distributions with finite fourth moments, $\tilde{\Omega}(p)$ samples suffice (Vershynin 2011), 
+    \item for distributions with finite second moments $\Omega(p\log p)$ samples suffice (Rudelson 1999). 
 \end{itemize}
 \end{slide}
 
-\begin{slide}{An observation \dots}
+\begin{slide}{An observation}
+A condition of the sort
 \[
 \|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2
 \]
-ensures (Davis--Kahan $\sin \Theta$ theorem) and is necessary for the recovery of eigenvectors of $\mat{\Sigma}$ \dots
+is necessary for the recovery of eigenvectors of $\mat{\Sigma}$ \dots
 
-but \emph{not} the recovery of any but the top eigenvalue:
+but does \emph{not} ensure the recovery of any but the top eigenvalue:
 \[
 |\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| < \varepsilon \|\mat{\Sigma}\|_2 
 \]
 is unsatisfactory if $\lambda_k \ll \lambda_1.$
 
-INSERT + + +             + illustration here
-
 \end{slide}
 
 \begin{slide}{\dots and a proposal}
+
+What if we want accurate estimates of each eigenvalue, e.g. for rank estimation?
+
 Consider the complimentary question:
 how many samples ensure the eigenvalues are estimated to relative accuracy,
 \[
-|\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| \leq \varepsilon \lambda_k(\mat{\Sigma}_n)?
+|\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| \leq \varepsilon \lambda_k(\mat{\Sigma})?
 \]
 
-Would be useful to know for e.g. rank estimation with a user specified threshold.
 \end{slide}
 
 \begin{slide}{A simplified result}
 
+%\begin{tikzpicture}
+%\node [theorembox] (box){%
+%\begin{minipage}{\textwidth}
 \begin{thm}
-Let $\{\mat{\eta}_j\}_{j=1}^n \subset \R^p$ be i.i.d. samples drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distribution. 
-If $n = \Omega(\varepsilon^{-2} p \log p),$ then with high probability
+Let $\{\mat{x}_i\}_{i=1}^n \subset \R^p$ be i.i.d. samples drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distribution. 
+If $\varepsilon \in (0, 1]$ and $n = \Omega(\varepsilon^{-2} p \log p),$ then with high probability
 \[
 |\lambda_k(\widehat{\mat{\Sigma}}_n) - \lambda_k(\mat{\Sigma})| \leq \varepsilon \lambda_k(\mat{\Sigma}) \quad \text{ for } k=1,\ldots,p.
 \]
 \end{thm}
-
+%\end{minipage}
+%};
+%\node [fancytitle, right=10pt] at (box.north west) {Relative error eigenvalue estimation};
+%\end{tikzpicture}
 \begin{itemize}
 	\item The implicit constant depends on the spectrum of $\mat{\Sigma}.$
 	\item If $\mat{\Sigma}$ is rank $r,$ then $n= \Omega(\varepsilon^{-2} r \log r)$ samples suffice.
@@ -97,45 +111,90 @@ If $n = \Omega(\varepsilon^{-2} p \log p),$ then with high probability
 \end{slide}
 
 \begin{slide}{Proof sketch}
-(progressive display)
+
+It suffices to show
+\[
+ \textstyle \Prob{\hat{\lambda}_k \geq (1+\varepsilon) \lambda_k } \quad \text{ and } \quad \Prob{\hat{\lambda}_k \leq (1-\varepsilon) \lambda_k}
+\]
+decay like $p\cdot \exp(-n\epsilon^2/O(p)).$
+
 \begin{enumerate}
-	\item Consider the probability that $|\hat{\lambda}_k - \lambda_k| > t.$
+	\item Address the cases $\hat{\lambda}_k \leq \lambda_k -t $ and $\hat{\lambda}_k \geq \lambda_k + t$ separately. 
 
-	\item Address the cases $\hat{\lambda}_k < \lambda_k -t $ and $\hat{\lambda}_k > \lambda_k + t$ separately. 
+	\item {\bf Reduce the probability of each case occuring to the probability that the norm of an appropriate matrix is large.}
 
-	\item {\bf Reduce the probability of each case occuring to the probability that the norm of an appropriate random matrix is large.}
-
-	\item {\bf Use matrix Bernstein bounds to control these probabilities. }
+	\item {\bf Use matrix Bernstein bounds to establish the subexponential tails of this norm. }
 
 	\item Take a union bound over the indices $k.$
  \end{enumerate}
  
 \end{slide}
 
-\begin{slide}{}
+\begin{slide}{Reduction for $\hat{\lambda}_k \geq \lambda_k + t$}
 
-Let
-\[
-\mathbb{V}^p_d = \{ \mat{V} \in \C^{p \times d} : \mat{V}^\star \mat{V} = \mat{I} \}
-\]
-be the collection of $d$-dimensional orthogonal bases in $\C^p$. 
-
-Let $\mat{B} \in \mathbb{V}^p_{p-k+1}$ span the bottom $p-k+1$-dimensional invariant subspace of $\mat{\Sigma}.$
+Let $\mat{B}$ have orthonormal columns and span the bottom $(p-k+1)$-dimensional invariant subspace of $\mat{\Sigma}.$
 
 By Courant--Fischer,
 \[
-\lambda_k(\widehat{\mat{\Sigma}}_n) = \min_{\mat{V} \in \mathbb{V}^p_{p-k+1}} \lambda_1(\mat{V}^\star \widehat{\mat{\Sigma}}_n\mat{V}) \leq \lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}).
+ \lambda_k(\mat{\Sigma}) = \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B})
 \]
-
+and
+\[
+\lambda_k(\widehat{\mat{\Sigma}}_n) = \min_{\substack{ \mat{V} \in \C^{p \times (p-k+1)} \\ \mat{V}^\star\mat{V}=\mat{I}}} \lambda_1(\mat{V}^\star \widehat{\mat{\Sigma}}_n\mat{V}) \leq \lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}).
+\]
+ 
 Thus 
 \[
-\Prob{\hat{\lambda}_k \geq \lambda_k + t } \leq \Prob{\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq \lambda_k(\mat{A}) + t }.
+\Prob{\hat{\lambda}_k \geq \lambda_k + t } \leq \Prob{\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq  \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + t }.
 \]
 
 \end{slide}
 
+\begin{slide}{Bernstein inequality}
+ Consider the probability
+\begin{multline*}
+ \Prob{\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq  \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + t } \\
+ = \Prob{\lambda_1\left(\sum_{i=1}^n \mat{B}^\star \mat{x}_i \mat{x}_i^\star \mat{B} \right) \geq n \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + n t}.
+\end{multline*}
 
-\begin{slide}{A natural extension}
+The real variable analogue,
+\[
+ \Prob{ \sum_{i=1}^n x_i \geq t },
+\]
+can be bounded, using Bernstein's inequality, in terms of the variances of the summands and a uniform bound on their magnitudes.
 \end{slide}
+
+\begin{slide}{}
+ We use a matrix version of Bernstein's inequality. Since the summands are not bounded, we substitute moment information.
+
+\begin{thm}
+Suppose matrices $\{\mat{X}_i\}$ have dimension $d$ and 
+\[\textstyle \E(\mat{X}_i^m) \preceq \frac{m!}{2} M^{m-2} \mat{C}_i^2 \quad \text{ for } m =2,3,4,\ldots.
+\]
+Set
+\[ \textstyle \mu = \lambda_1\left( \sum_i \E\mat{X}_i \right) \]
+and define
+\[ \textstyle \sigma^2 = \lambda_1\left(\sum_i \mat{C}_i^2 \right). \]
+Then, for any $t \geq 0,$
+\[	
+ \textstyle \Prob{ \lambda_1\left(\sum_i \mat{X}_i\right) \geq \mu + t } \leq d \cdot \exp\left(- \frac{t^2/2}{\sigma^2 + Mt} \right).
+\]
+\end{thm}
+
+\end{slide}
+
+\begin{slide}{}
+ After computing $M$ and $\mat{C}_i^2$ for the summands $\mat{B}^\star \mat{x}_i \mat{x}_i^\star \mat{B},$ this gives
+\[
+ \Prob{\hat{\lambda}_k \geq \lambda_k +t} \leq (p-k+1)\cdot \exp\left( \frac{-nt^2}{32\lambda_k \sum_{i \geq k} \lambda_i } \right) \quad \text{ for } t \leq 4n \lambda_k.
+\]
+Finally, take $t = \epsilon \lambda_k$ to see
+\[
+ \Prob{\hat{\lambda}_k \geq (1+\varepsilon) \lambda_k} \leq (p-k+1)\cdot \exp\left( \frac{-n\varepsilon^2}{32\sum_{i \geq k} \frac{\lambda_i}{\lambda_k} } \right) \quad \text{ for } \varepsilon \leq 4n.
+\]
+The proof for the case $\hat{\lambda}_k \leq \lambda_k - t$ is similar.
+\qed
+\end{slide}
+
 \end{document}
 
