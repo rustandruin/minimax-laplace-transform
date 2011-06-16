@@ -5,4 +5,5 @@
 *.log
 *.out
 *.pdf
+*.bak
 !col_spars_nlogn_100.pdf
