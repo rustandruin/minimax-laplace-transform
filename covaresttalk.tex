@@ -10,8 +10,23 @@
 \setfootline{\insertshortauthor \quad \insertshorttitle \quad \insertshortdate \hfill \insertframenumber/\inserttotalframenumber}
 \usepackage[utf8]{inputenc}
 \usepackage{kerkis}
+\usepackage{bm}
 %\usepackage[scaled=0.875]{helvet}%
 \renewcommand{\ttdefault}{lmtt}%
+
+%add footnotes to indicate support
+\usepackage[absolute,overlay]{textpos} 
+\newenvironment{support}[2]{% 
+  \begin{textblock*}{\textwidth}(#1,#2) 
+      \footnotesize\it\bgroup\color{black!50}}{\egroup\end{textblock*}}
+			
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,fit}
+\tikzstyle{every picture}+=[remember picture]
+\tikzstyle{na} = [baseline=-.5ex]
+\everymath{\displaystyle}
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
 
 \hypersetup{%
   pdftitle={Covariance estimation},%
@@ -24,6 +39,20 @@
             %pdfpagemode   = FullScreen}
 \hypersetup{colorlinks=true,urlcolor=blue}
 
+% add bookmarks for easier navigations
+\usepackage{bookmark}
+\usepackage{etoolbox}
+\makeatletter
+\apptocmd{\beamer@@frametitle}{
+  % keep this line to add the frame title to the TOC at the "subsection level"
+  \addtocontents{toc}{\protect\beamer@subsectionintoc{\the\c@section}{0}{#1}{\the\c@page}{\the\c@part}%
+        {\the\beamer@tocsectionnumber}}%
+  % keep this line to add a bookmark that shows up in the PDF TOC at the subsection level
+  \bookmark[page=\the\c@page,level=3]{#1}
+  }%
+  {\message{** patching of \string\beamer@@frametitle succeeded **}}%
+  {\message{** patching of \string\beamer@@frametitle failed **}}%
+\makeatother
 
 %\setbeamertemplate{navigation symbols}{}
 \setbeamercovered{dynamic}
@@ -36,12 +65,15 @@
 \newcommand{\E}{\ensuremath{\mathbb{E}}}
 \newcommand{\C}{\ensuremath{\mathbb{C}}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\e}{\ensuremath{\mathrm{e}}}
+
+\DeclareMathOperator{\tr}{tr}
 
 \newtheorem*{thm}{Theorem}
 
 % Titlepage info
 \title{Covariance estimation}
-\subtitle[]{an application of tail bounds for sums of random matrices}
+\subtitle[]{via tail bounds for eigenvalues of sums of random matrices}
 \author[A. Gittens \and J.~A. Tropp]{Alex Gittens \and Joel A. Tropp}
 \institute[Caltech]{%
 Department of Computing and Mathematical Sciences \\
@@ -55,18 +87,21 @@ California Institute of Technology \\
 \begin{document}
 
 \begin{frame}[plain]
+\begin{support}{19mm}{85mm}
+${}^\star$Research supported by ONR and AFOSR awards and a Sloan Fellowship.
+\end{support}
 \titlepage
 \end{frame}
 
 \begin{frame}{Problem Statement}
 
-Let $\mat{x}$ be a centered high-dimensional random vector. First order information on the dependence structure of $\mat{x}$ is captured by the covariance matrix
+Let $\mat{x} \in \R^p$ be a zero-mean high-dimensional random vector. Information on the dependence structure of $\mat{x}$ is captured by the covariance matrix
 \[
-\mat{\Sigma} = \E \mat{x} \mat{x}^\star = (\E x_i x_j)_{i,j=1}^p = (\text{cov}(x_i, x_j))_{i=1}^p.
+\mat{\Sigma} = \E \mat{x} \mat{x}^\star.
 \]
 The sample covariance matrix is a classical estimator for $\mat{\Sigma}:$
 \[
-\widehat{\mat{\Sigma}}_n = \frac{1}{n} \sum_{i=1}^n \mat{x}_i\mat{x}_i^\star.
+\widehat{\mat{\Sigma}}_n = \frac{1}{n} \sum\nolimits_{i=1}^n \mat{x}_i\mat{x}_i^\star.
 \]
 
 \begin{displaybox}{0.7\linewidth}
@@ -78,44 +113,49 @@ The sample covariance matrix is a classical estimator for $\mat{\Sigma}:$
 \begin{frame}{What is known}
 
 Typically accuracy is measured in spectral norm.
-
+\vspace{1em}
 \begin{displaybox}{0.7\linewidth}
 \parbox{\linewidth}{%
 How many samples ensure that
 \[ \|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2? \]
 }
 \end{displaybox}
- 
 \pause
 \begin{itemize}
-    \item for log-concave distributions $\Omega(p)$ samples suffice (Adamczak et al. 2011), 
+    \item for \textcolor{OliveGreen}{log-concave} distributions $\Omega(p)$ samples suffice (Adamczak et al. 2011), 
 		\pause
-    \item for distributions with finite fourth moments, $\tilde{\Omega}(p)$ samples suffice (Vershynin 2011), 
+    \item for distributions with \textcolor{OliveGreen}{finite fourth moments}, $\tilde{\Omega}(p)$ samples suffice (Vershynin 2011a), 
 		\pause
-    \item for distributions with finite second moments $\Omega(p\log p)$ samples suffice (Rudelson 1999). 
+		\item for distributions with \textcolor{OliveGreen}{finite $2+\varepsilon$ moments} that satisfy a regularity condition, $\Omega(p)$ samples suffice (Vershynin 2011b),
+		\pause
+    \item for distributions with \textcolor{OliveGreen}{finite second moments}, $\Omega(p\log p)$ samples suffice (Rudelson 1999). 
 \end{itemize}
 \end{frame}
 
 \begin{frame}{An observation}
-A condition of the sort
+A relative spectral error bound,
 \[
-\|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2
+\|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2,
 \]
 is necessary for the recovery of eigenvectors of $\mat{\Sigma}$ \dots
 
+\vspace{1em}
+\pause
 but does \emph{not} ensure the recovery of any but the top eigenvalue:
 \[
 |\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| < \varepsilon \|\mat{\Sigma}\|_2 
 \]
-is unsatisfactory if $\lambda_k \ll \lambda_1.$
+is not meaningful if $\lambda_k \ll \lambda_1.$
 
-Need O$(\varepsilon^{-2} \kappa(\mat{\Sigma})^2 p)$ measurements.
+\vspace{1em}
+\pause
+Using relative spectral error bounds, need O$(\varepsilon^{-2} \kappa(\mat{\Sigma})^2 p)$ measurements to get relative recovery of all eigenvalues.
 \end{frame}
 
 \begin{frame}{\dots and a question}
 
 What if we want accurate estimates of each eigenvalue, e.g. for rank estimation?
-
+\vspace{1em}
 \begin{displaybox}{0.7\textwidth}
 \parbox{\textwidth}{%
 How many samples ensure the eigenvalues are estimated to relative accuracy,
@@ -125,31 +165,90 @@ How many samples ensure the eigenvalues are estimated to relative accuracy,
 }
 \end{displaybox}
 
-Can we do better than $\epsilon^{-2} \kappa(\mat{\Sigma})^2 p$?
+\vspace{1em}
+Can we do better than $\varepsilon^{-2} \kappa(\mat{\Sigma})^2 p$?
 
 \end{frame}
 
 \begin{frame}{A simplified result}
 
-%\begin{tikzpicture}
-%\node [theorembox] (box){%
-%\begin{minipage}{\textwidth}
 \begin{thm}
-Let $\{\mat{x}_i\}_{i=1}^n \subset \R^p$ be i.i.d. samples drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distribution. 
-If $\varepsilon \in (0, 1]$ and $n = \Omega_{\mat{\Sigma}}(\varepsilon^{-2} \log p),$ then with high probability
+Let the samples be drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distribution. Assume the spectrum of $\mat{\Sigma}$ decays sufficiently. If $\varepsilon \in (0, 1]$ and $n = \Omega(\varepsilon^{-2} \log^2 p),$ then with high probability, for each k=1,\ldots,p,
 \[
-|\lambda_k(\widehat{\mat{\Sigma}}_n) - \lambda_k(\mat{\Sigma})| \leq \varepsilon \lambda_k(\mat{\Sigma}) \quad \text{ for } k=1,\ldots,p.
+|\lambda_k(\widehat{\mat{\Sigma}}_n) - \lambda_k(\mat{\Sigma})| \leq \varepsilon \lambda_k(\mat{\Sigma}) 
 \]
 \end{thm}
-%\end{minipage}
-%};
-%\node [fancytitle, right=10pt] at (box.north west) {Relative error eigenvalue estimation};
-%\end{tikzpicture}
+
 \begin{itemize}
-	\item The constant in the estimate for $n$ depends on the spectrum of $\mat{\Sigma}$ and is between $\Omega(\kappa(\mat{\Sigma})^2)$ and $\Omega(\kappa(\mat{\Sigma})^2 p)$ .
-	\item If $\mat{\Sigma}$ is rank $r,$ then $n= \Omega_{\mat{\Sigma}}(\varepsilon^{-2} \log r)$ samples suffice.
-	\item The approach generalizes to other distributions.
+\pause
+	\item Sufficient decay is, e.g. 
+	\[ \lambda_i \leq \mathrm{C} \frac{\lambda_1}{i}. 
+	\] 
+	In this case, the implicit constant in $n$ is $\Omega(\kappa(\mat{\Sigma})^2).$
+	\pause
+	\item With no decay, the `constant' is $\Omega(\kappa(\mat{\Sigma})^2 p \log^{-1}p )$ .
+	\pause
+	\item If $\mat{\Sigma}$ is rank $r,$ then $n= \Omega(\varepsilon^{-2} \log^2 r)$ samples suffice.
+	\pause
+	\item The approach \emph{generalizes} to other distributions.
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}{More generally}
+Restrict, for each $k$, probability that $\hat{\lambda}_k$ under/overestimates $\lambda_k.$ Interesting cases: 
+
+\begin{itemize}
+\pause
+	\item an upper bound on $\lambda_1$
+\[
+n = \frac{1}{32\varepsilon^2} 
+\begin{tikzpicture}[baseline]
+\node[anchor=base] (n1)
+{$\frac{\tr{\mat{\Sigma}}}{\lambda_1}(\log p + \delta)$};
+
+\begin{pgfonlayer}{background}
+\node[fill=OliveGreen!40,draw=OliveGreen,fit=(n1)] {};
+\end{pgfonlayer}
+
+\end{tikzpicture}
+\Rightarrow \Prob{\hat{\lambda}_1 \geq (1+\varepsilon) \lambda_1} \leq \e^{-\delta}.
+\]
+
+\pause
+	\item a lower bound on $\lambda_k$
+
+\[
+	n = \frac{8}{3\varepsilon^2} 
+	\begin{tikzpicture}[baseline]
+	\node[anchor=base] (n2) 
+	{$\kappa(\mat{\Sigma}) \frac{\tr{\mat{\Sigma}}}{\lambda_p} (\log p + \delta)$}; 
+		
+\begin{pgfonlayer}{background}
+\node[fill=BurntOrange!40,draw=BurntOrange,fit=(n2)] {};
+\end{pgfonlayer}
+\end{tikzpicture}
+	\Rightarrow \Prob{\hat{\lambda}_p \leq (1-\varepsilon)\lambda_p} \leq \e^{-\delta}.
+\]
+
+\end{itemize}
+
+\pause 
+If the spectrum decays:
+\begin{itemize}
+ \item Can be as small as $\log^2 p$  \tikz[na] \node[coordinate] (l1) {};
+\begin{tikzpicture}[overlay]
+ \path[->,OliveGreen,thick] (l1) edge [out=90, in=-90] (n1);
+\end{tikzpicture}
+
+\pause
+
+ \item Can be as small as $\kappa(\mat{\Sigma})^2 \log^2 p$  \tikz[na] \node[coordinate] (l2) {};
+\begin{tikzpicture}[overlay]
+ \path[->,BurntOrange,thick] (l2) edge [out=0, in=-90] (n2);
+\end{tikzpicture}
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Proof sketch}
@@ -158,19 +257,16 @@ It suffices to show
 \[
  \textstyle \Prob{\hat{\lambda}_k \geq (1+\varepsilon) \lambda_k } \quad \text{ and } \quad \Prob{\hat{\lambda}_k \leq (1-\varepsilon) \lambda_k}
 \]
-decay like $p\cdot \exp(-n\epsilon^2/O(p)).$
+decay with appropriate subgaussian (i.e. $\mathrm{C} \exp(-\mathrm{c} n \epsilon^2)$) tails.
 
 \pause
 \begin{enumerate}
-	\item Address the cases $\hat{\lambda}_k \leq \lambda_k -t $ and $\hat{\lambda}_k \geq \lambda_k + t$ separately. 
-	
-	\pause
-	
-	\item {\bf Reduce the probability of each case occuring to the probability that the norm of an appropriate matrix is large.}
+		
+	\item Reduce the probability of each case occuring to the probability that the norm of an appropriate matrix is large.
 
 	\pause
 	
-	\item {\bf Use matrix Bernstein bounds to establish the subexponential tails of this norm. }
+	\item Use matrix Bernstein bounds to establish the subexponential tails of these norms. 
 
 	\pause
 	
@@ -183,61 +279,110 @@ decay like $p\cdot \exp(-n\epsilon^2/O(p)).$
 
 Let $\mat{B}$ have orthonormal columns and span the bottom $(p-k+1)$-dimensional invariant subspace of $\mat{\Sigma}.$
 
+\underline{Claim}
+\[
+\Prob{
+\begin{tikzpicture}[baseline]
+\node[anchor=base] (esteigenval) {$\hat{\lambda}_k$};
+%\onslide<3->{\begin{pgfonlayer}{background}
+%\node[fill=OliveGreen!40,draw=OliveGreen,fit=(esteigenval)] {};
+%\end{pgfonlayer}}
+\end{tikzpicture}
+\geq 
+\tikz[baseline]{\node[anchor=base] (eigenval) {$\lambda_k$};} + t 
+} \leq
+\Prob{
+\tikz[baseline]{\node[anchor=base] (pinchedesteigenval) {$\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B})$}; }
+\geq  
+\tikz[baseline]{\node[anchor=base] (eigenvalexpansion) {$\lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B})$};} + t }.
+\]
+
+\pause
+\emph{Proof.}
+
 By Courant--Fischer,
 \[
  \lambda_k(\mat{\Sigma}) = \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B})
 \]
+
+\pause
 and
 \[
 \lambda_k(\widehat{\mat{\Sigma}}_n) = \min_{\substack{ \mat{V} \in \C^{p \times (p-k+1)} \\ \mat{V}^\star\mat{V}=\mat{I}}} \lambda_1(\mat{V}^\star \widehat{\mat{\Sigma}}_n\mat{V}) \leq \lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}).
 \]
- 
-Thus 
+
+\qed
+\end{frame}
+
+\begin{frame}{Using the reduction}
+Need to control RHS of 
 \[
-\Prob{\hat{\lambda}_k \geq \lambda_k + t } \leq \Prob{\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq  \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + t }.
+\Prob{\hat{\lambda}_k \geq \lambda_k + t }
+\leq
+\Prob{
+\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq  
+\lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + t 
+}
 \]
+\pause
+Note:
+\begin{itemize}
+	\item 
+$\lambda_1(\mat{B}^\star \hat{\mat{\Sigma}}_n \mat{B}) \rightarrow \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}),$ and
+	\item $\mat{B}^\star \hat{\mat{\Sigma}}_n \mat{B} = \sum\nolimits_i \mat{B}^\star \mat{x}_i\mat{x}_i^\star \mat{B}$ is a sum of independent random matrices.
+\end{itemize}
+\pause
+Use estimates of the matrix moments of the summands to quantify the convergence. 
+
+\begin{itemize}
+\pause
+\item If $\mat{g} \sim \mathcal{N}(\mat{0}, \mat{C})$, then for $m \geq 2,$
+\[
+\E(\mat{g}\mat{g}^\star)^m \preceq 2^m m! (\tr{\mat{C}})^{m-1} \cdot \mat{C}.
+\]
+\pause
+\item \emph{Other distributions may satisfy similar semidefinite bounds.}
+\end{itemize}
 
 \end{frame}
 
-\begin{frame}{Bernstein inequality}
- Consider the probability
-\begin{multline*}
- \Prob{\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq  \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + t } \\
- = \Prob{\lambda_1\left(\sum_{i=1}^n \mat{B}^\star \mat{x}_i \mat{x}_i^\star \mat{B} \right) \geq n \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + n t}.
-\end{multline*}
+%\begin{frame}{Bernstein inequality}
+ %Consider the probability
+%\begin{multline*}
+ %\Prob{\lambda_1(\mat{B}^\star \widehat{\mat{\Sigma}}_n \mat{B}) \geq  \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + t } \\
+ %= \Prob{\lambda_1\left(\sum_{i=1}^n \mat{B}^\star \mat{x}_i \mat{x}_i^\star \mat{B} \right) \geq n \lambda_1(\mat{B}^\star \mat{\Sigma} \mat{B}) + n t}.
+%\end{multline*}
+%
+%The real variable analogue,
+%\[
+ %\Prob{ \sum_{i=1}^n x_i \geq t },
+%\]
+%can be bounded, using Bernstein's inequality, in terms of the variances of the summands and a uniform bound on their magnitudes.
+%\end{frame}
 
-The real variable analogue,
-\[
- \Prob{ \sum_{i=1}^n x_i \geq t },
-\]
-can be bounded, using Bernstein's inequality, in terms of the variances of the summands and a uniform bound on their magnitudes.
-\end{frame}
+\begin{frame}{Matrix Bernstein inequality }
+ We use a moment-based matrix analog of Bernstein's inequality.
 
-\begin{frame}{}
- We use a matrix version of Bernstein's inequality. Since the summands are not bounded, we substitute moment information.
-
-\begin{thm}
-Suppose matrices $\{\mat{X}_i\}$ have dimension $d$ and 
-\[\textstyle \E(\mat{X}_i^m) \preceq \frac{m!}{2} M^{m-2} \mat{C}_i^2 \quad \text{ for } m =2,3,4,\ldots.
+\begin{thm}[Matrix Moment-Bernstein Inequality]
+Suppose self-adjoint matrices $\{\mat{G}_i\}$ have dimension $d$ and 
+\[ \E(\mat{G}_i^m) \preceq \frac{m!}{2} A^{m-2} \cdot \mat{C}_i^2 \quad \text{ for } m =2,3,4,\ldots.
 \]
 Set
-\[ \textstyle \mu = \lambda_1\left( \sum_i \E\mat{X}_i \right) \]
-and define
-\[ \textstyle \sigma^2 = \lambda_1\left(\sum_i \mat{C}_i^2 \right). \]
+\[ \mu = \lambda_1\Big( \sum\nolimits_i \E\mat{G}_i \Big) \quad \text{and} \quad \sigma^2 = \lambda_1\Big(\sum\nolimits_i \mat{C}_i^2 \Big). \]
 Then, for any $t \geq 0,$
 \[	
- \textstyle \Prob{ \lambda_1\left(\sum_i \mat{X}_i\right) \geq \mu + t } \leq d \cdot \exp\left(- \frac{t^2/2}{\sigma^2 + Mt} \right).
+ \Prob{ \lambda_1\Big(\sum\nolimits_i \mat{G}_i\Big) \geq \mu + t } \leq d \cdot \exp\Big(- \frac{t^2/2}{\sigma^2 + At} \Big).
 \]
 \end{thm}
 
 \end{frame}
 
-\begin{frame}{}
- After computing $M$ and $\mat{C}_i^2$ for the summands $\mat{B}^\star \mat{x}_i \mat{x}_i^\star \mat{B},$ this gives
+\begin{frame}{Finishing the argument}
+ After computing $A$ and $\mat{C}_i^2$ for the summands $\mat{B}^\star \mat{x}_i \mat{x}_i^\star \mat{B},$ this gives
 \[
  \Prob{\hat{\lambda}_k \geq \lambda_k +t} \leq (p-k+1)\cdot \exp\left( \frac{-nt^2}{32\lambda_k \sum_{i \geq k} \lambda_i } \right) \quad \text{ for } t \leq 4n \lambda_k.
 \]
-Finally, take $t = \epsilon \lambda_k$ to see
+Finally, take $t = \varepsilon \lambda_k$ to see
 \[
  \Prob{\hat{\lambda}_k \geq (1+\varepsilon) \lambda_k} \leq (p-k+1)\cdot \exp\left( \frac{-n\varepsilon^2}{32\sum_{i \geq k} \frac{\lambda_i}{\lambda_k} } \right) \quad \text{ for } \varepsilon \leq 4n.
 \]
@@ -245,5 +390,14 @@ The proof for the case $\hat{\lambda}_k \leq \lambda_k - t$ is similar.
 \qed
 \end{frame}
 
+\begin{frame}{Details}
+``{\it Tail Bounds for All Eigenvalues of A Sum of Random Matrices}'', Gittens and Tropp, 2011. Preprint, \href{http://arxiv.org/abs/1104.4513}{arXiv:1104.4513}.
+\begin{itemize}
+\item Elaboration on the relative error estimation results.
+\item Similar variational arguments to find tail bounds for all eigenvalues of a sum of random matrices.
+\item An application to column subsampling.
+\end{itemize}
+
+\end{frame}
 \end{document}
 
