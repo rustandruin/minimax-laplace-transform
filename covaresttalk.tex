@@ -11,6 +11,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{kerkis}
 \usepackage{bm}
+\usepackage{colortbl}
 %\usepackage[scaled=0.875]{helvet}%
 \renewcommand{\ttdefault}{lmtt}%
 
@@ -137,11 +138,11 @@ A relative spectral error bound,
 \[
 \|\mat{\Sigma} - \widehat{\mat{\Sigma}}_n\|_2 \leq \varepsilon \|\mat{\Sigma}\|_2,
 \]
-is necessary for the recovery of eigenvectors of $\mat{\Sigma}$ \dots
+ensures recovery of the top eigenpair of $\mat{\Sigma},$ \ldots
 
 \vspace{1em}
 \pause
-but does \emph{not} ensure the recovery of any but the top eigenvalue:
+but does \emph{not} ensure the recovery of the remaining eigenpairs:
 \[
 |\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| < \varepsilon \|\mat{\Sigma}\|_2 
 \]
@@ -149,16 +150,17 @@ is not meaningful if $\lambda_k \ll \lambda_1.$
 
 \vspace{1em}
 \pause
-Using relative spectral error bounds, need O$(\varepsilon^{-2} \kappa(\mat{\Sigma})^2 p)$ measurements to get relative recovery of all eigenvalues.
+Using known relative spectral error bounds, need O$(\varepsilon^{-2} \kappa(\mat{\Sigma}_\ell)^2 p)$ measurements to get relative error recovery of the top $\ell$ eigenvalues.
 \end{frame}
 
 \begin{frame}{\dots and a question}
 
-What if we want accurate estimates of each eigenvalue, e.g. for rank estimation?
+Maybe $\mat{\Sigma}$ has a decaying spectrum.
+What if we want accurate estimates of a few of its eigenvalues?
 \vspace{1em}
 \begin{displaybox}{0.7\textwidth}
 \parbox{\textwidth}{%
-How many samples ensure the eigenvalues are estimated to relative accuracy,
+How many samples ensure the top $\ell \ll p$ eigenvalues are estimated to relative accuracy,
 \[
 |\lambda_k(\mat{\Sigma}) - \lambda_k(\widehat{\mat{\Sigma}}_n)| \leq \varepsilon \lambda_k(\mat{\Sigma})?
 \]
@@ -166,14 +168,18 @@ How many samples ensure the eigenvalues are estimated to relative accuracy,
 \end{displaybox}
 
 \vspace{1em}
-Can we do better than $\varepsilon^{-2} \kappa(\mat{\Sigma})^2 p$?
+Do we really need O($p$) measurements to recover just a few of the top eigenvalues?
 
 \end{frame}
 
 \begin{frame}{A simplified result}
 
 \begin{thm}
-Let the samples be drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distribution. Assume the spectrum of $\mat{\Sigma}$ decays sufficiently. If $\varepsilon \in (0, 1]$ and $n = \Omega(\varepsilon^{-2} \log^2 p),$ then with high probability, for each k=1,\ldots,p,
+Let the samples be drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distribution. Assume $\lambda_k$ decays sufficiently for $k > \ell$. If $\varepsilon \in (0, 1]$ and 
+\[
+n = \Omega(\varepsilon^{-2} \kappa(\mat{\Sigma}_\ell)^2 \ell \log p),
+\]
+then with high probability, for each $k=1,\ldots,\ell,$
 \[
 |\lambda_k(\widehat{\mat{\Sigma}}_n) - \lambda_k(\mat{\Sigma})| \leq \varepsilon \lambda_k(\mat{\Sigma}) 
 \]
@@ -181,74 +187,82 @@ Let the samples be drawn from a $\mathcal{N}(\mat{0}, \mat{\Sigma})$ distributio
 
 \begin{itemize}
 \pause
-	\item Sufficient decay is, e.g. 
-	\[ \lambda_i \leq \mathrm{C} \frac{\lambda_1}{i}. 
+	\item Sufficient decay is, (other conditions give other results)
+	\[ \sum_{i > \ell} \lambda_i/\lambda_1 \leq C.
 	\] 
-	In this case, the implicit constant in $n$ is $\Omega(\kappa(\mat{\Sigma})^2).$
+	This is satisfied if, e.g., the tail eigenvalues, $k > \ell,$ correspond to spread-spectrum noise or decay like $\tfrac{1}{i^{(1+\iota)}
+	}$ for some $\iota > 0.$
 	\pause
-	\item With no decay, the `constant' is $\Omega(\kappa(\mat{\Sigma})^2 p \log^{-1}p )$ .
-	\pause
-	\item If $\mat{\Sigma}$ is rank $r,$ then $n= \Omega(\varepsilon^{-2} \log^2 r)$ samples suffice.
-	\pause
-	\item The approach \emph{generalizes} to other distributions.
+	\item The approach generalizes to other subgaussian distributions.
 \end{itemize}
 
 \end{frame}
 
 \begin{frame}{More generally}
-Restrict, for each $k$, probability that $\hat{\lambda}_k$ under/overestimates $\lambda_k.$ Interesting cases: 
-
+Restrict, for each $k$, probability that $\hat{\lambda}_k$ under/overestimates $\lambda_k.$
 \begin{itemize}
-\pause
-	\item an upper bound on $\lambda_1$
+\pause 
+\item an upper bound on $\lambda_k$ 
 \[
-n = \frac{1}{32\varepsilon^2} 
-\begin{tikzpicture}[baseline]
-\node[anchor=base] (n1)
-{$\frac{\tr{\mat{\Sigma}}}{\lambda_1}(\log p + \delta)$};
-
-\begin{pgfonlayer}{background}
-\node[fill=OliveGreen!40,draw=OliveGreen,fit=(n1)] {};
-\end{pgfonlayer}
-
-\end{tikzpicture}
-\Rightarrow \Prob{\hat{\lambda}_1 \geq (1+\varepsilon) \lambda_1} \leq \e^{-\delta}.
+n = \frac{8}{3 \varepsilon^2} \tikz[baseline] \node[anchor=base,rounded corners,fill=OliveGreen!30] {$\kappa(\mat{\Sigma}_k) \frac{\tr{\mat{\Sigma}_k}}{\lambda_k}(\log k + \beta \log p)$}; \Rightarrow \Prob{\frac{\hat{\lambda}_k}{1-\epsilon} > \lambda_k} > 1- p^{-\beta}
 \]
 
 \pause
 	\item a lower bound on $\lambda_k$
-
-\[
-	n = \frac{8}{3\varepsilon^2} 
-	\begin{tikzpicture}[baseline]
-	\node[anchor=base] (n2) 
-	{$\kappa(\mat{\Sigma}) \frac{\tr{\mat{\Sigma}}}{\lambda_p} (\log p + \delta)$}; 
-		
-\begin{pgfonlayer}{background}
-\node[fill=BurntOrange!40,draw=BurntOrange,fit=(n2)] {};
-\end{pgfonlayer}
-\end{tikzpicture}
-	\Rightarrow \Prob{\hat{\lambda}_p \leq (1-\varepsilon)\lambda_p} \leq \e^{-\delta}.
-\]
-
-\end{itemize}
+\begin{multline*}
+n = \frac{1}{32\varepsilon^2} 
+\tikz[baseline] \node[anchor=base,rounded corners,fill=BurntOrange!30] {$\frac{\big(\sum\nolimits_{i \geq k}\lambda_i \big)}{\lambda_k} \textstyle (\log (p-k+1) + \beta \log p)$}; \\
+\Rightarrow \Prob{\frac{\hat{\lambda}_k}{1+\varepsilon} < \lambda_k} > 1-p^{-\beta}.
+\end{multline*}
 
 \pause 
-If the spectrum decays:
-\begin{itemize}
- \item Can be as small as $\log^2 p$  \tikz[na] \node[coordinate] (l1) {};
-\begin{tikzpicture}[overlay]
- \path[->,OliveGreen,thick] (l1) edge [out=90, in=-90] (n1);
-\end{tikzpicture}
 
-\pause
+\item Assuming decay
+\begin{center}
+	\begin{tabular}{l >{\columncolor{OliveGreen!30}}c >{\columncolor{BurntOrange!30}}c}
+	\multicolumn{1}{l}{} & \multicolumn{1}{l}{upper bound} & \multicolumn{1}{l}{lower bound} \\ 
+		$\lambda_1$ & O$(\log p)$ & O$(\ell \log p)$ \\
+		$\lambda_\ell$ & O$(\kappa^2(\mat{\Sigma}_\ell) \ell \log p)$ & O$(\kappa(\mat{\Sigma}_\ell) \log p)$ 
+	\end{tabular}
+\end{center}
 
- \item Can be as small as $\kappa(\mat{\Sigma})^2 \log^2 p$  \tikz[na] \node[coordinate] (l2) {};
-\begin{tikzpicture}[overlay]
- \path[->,BurntOrange,thick] (l2) edge [out=0, in=-90] (n2);
-\end{tikzpicture}
+%\pause
+	%\item a lower bound on $\lambda_k$
+%
+%\[
+	%n = \frac{8}{3\varepsilon^2} 
+	%\begin{tikzpicture}[baseline]
+	%\node[anchor=base] (n2) 
+	%{$\kappa(\mat{\Sigma}) \frac{\tr{\mat{\Sigma}}}{\lambda_p} (\log p + \delta)$}; 
+		%
+%\begin{pgfonlayer}{background}
+%\node[fill=BurntOrange!40,draw=BurntOrange,fit=(n2)] {};
+%\end{pgfonlayer}
+%\end{tikzpicture}
+	%\Rightarrow \Prob{\hat{\lambda}_p \leq (1-\varepsilon)\lambda_p} \leq \e^{-\delta}.
+%\]
+	%\begin{itemize}
+	 %\item boo
+	%\end{itemize}
+	%
 \end{itemize}
 
+%\pause 
+%If the spectrum decays:
+%\begin{itemize}
+ %\item Can be as small as $\log^2 p$  \tikz[na] \node[coordinate] (l1) {};
+%\begin{tikzpicture}[overlay]
+ %\path[->,OliveGreen,thick] (l1) edge [out=90, in=-90] (n1);
+%\end{tikzpicture}
+%
+%\pause
+%
+ %\item Can be as small as $\kappa(\mat{\Sigma})^2 \log^2 p$  \tikz[na] \node[coordinate] (l2) {};
+%\begin{tikzpicture}[overlay]
+ %\path[->,BurntOrange,thick] (l2) edge [out=0, in=-90] (n2);
+%\end{tikzpicture}
+%\end{itemize}
+%
 \end{frame}
 
 \begin{frame}{Proof sketch}
@@ -257,7 +271,7 @@ It suffices to show
 \[
  \textstyle \Prob{\hat{\lambda}_k \geq (1+\varepsilon) \lambda_k } \quad \text{ and } \quad \Prob{\hat{\lambda}_k \leq (1-\varepsilon) \lambda_k}
 \]
-decay with appropriate subgaussian (i.e. $\mathrm{C} \exp(-\mathrm{c} n \epsilon^2)$) tails.
+decay like $\mathrm{C} \exp(-\mathrm{c} n \epsilon^2)$ when $\epsilon$ is sufficiently small.
 
 \pause
 \begin{enumerate}
@@ -266,11 +280,11 @@ decay with appropriate subgaussian (i.e. $\mathrm{C} \exp(-\mathrm{c} n \epsilon
 
 	\pause
 	
-	\item Use matrix Bernstein bounds to establish the subexponential tails of these norms. 
+	\item Use matrix Bernstein bounds to establish the correct decay of these norms. 
 
 	\pause
 	
-	\item Take a union bound over the indices $k.$
+	\item Take a union bound over the indices $k.$ 
  \end{enumerate}
  
 \end{frame}
@@ -333,15 +347,16 @@ $\lambda_1(\mat{B}^\star \hat{\mat{\Sigma}}_n \mat{B}) \rightarrow \lambda_1(\ma
 \end{itemize}
 \pause
 Use estimates of the matrix moments of the summands to quantify the convergence. 
-
 \begin{itemize}
 \pause
 \item If $\mat{g} \sim \mathcal{N}(\mat{0}, \mat{C})$, then for $m \geq 2,$
 \[
-\E(\mat{g}\mat{g}^\star)^m \preceq 2^m m! (\tr{\mat{C}})^{m-1} \cdot \mat{C}.
+\E(\mat{g}\mat{g}^\star)^m \preceq 2^m m!\,(\tr{\mat{C}})^{m-1} \cdot \mat{C}.
 \]
-\pause
-\item \emph{Other distributions may satisfy similar semidefinite bounds.}
+\item Other subgaussian distributions satisfy similar relations. Can also substitute bounds on matrix moment generating functions, 
+\[
+\E \exp\left(\theta \mat{y}\mat{y}^\star \right) \preceq \mat{U}(\theta).
+\]
 \end{itemize}
 
 \end{frame}
@@ -394,7 +409,7 @@ The proof for the case $\hat{\lambda}_k \leq \lambda_k - t$ is similar.
 ``{\it Tail Bounds for All Eigenvalues of A Sum of Random Matrices}'', Gittens and Tropp, 2011. Preprint, \href{http://arxiv.org/abs/1104.4513}{arXiv:1104.4513}.
 \begin{itemize}
 \item Elaboration on the relative error estimation results.
-\item Similar variational arguments to find tail bounds for all eigenvalues of a sum of random matrices.
+\item Similar arguments to find tail bounds for all eigenvalues of a sum of \emph{arbitrary} random matrices.
 \item An application to column subsampling.
 \end{itemize}
 
